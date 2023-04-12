@@ -1,0 +1,11 @@
+<?php
+echo "GenerateResults.php is being included";
+
+// Get zip code from URL parameter
+if(isset($_GET['zipcode'])) {
+    $zipcode = $_GET['zipcode'];
+}
+
+// Output zip code
+echo "Zip code: ".$zipcode;
+?>

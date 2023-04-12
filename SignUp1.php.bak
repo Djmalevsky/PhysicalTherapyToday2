@@ -1,0 +1,64 @@
+<?php
+session_start();
+
+
+if (isset($_SESSION['email'])) {
+  // Email key is set, use it
+  $email = $_SESSION['email'];
+} else {
+  // Email key is not set, handle error
+  echo "Error: Email not set in session";
+}
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+$servername = "localhost:3306";
+$username = "root";
+$password = "ppp";
+$dbname = "physicaltherapytoday";
+
+// Create connection
+$conn = mysqli_connect($servername, $username, $password, $dbname);
+
+// Check connection
+if (!$conn) {
+  die("Connection failed: " . mysqli_connect_error());
+}
+
+if(isset($_POST['submit'])) {
+  $email = $_POST['email'];
+  $password = $_POST['password'];
+  $confirm_password = $_POST['confirm_password'];
+
+  // Check if email already exists
+  $sql = "SELECT * FROM therapist_profiles WHERE email='$email'";
+  $result = mysqli_query($conn, $sql);
+
+  if (!$result) {
+    die('Error: ' . mysqli_error($conn));
+  }
+
+  if (mysqli_num_rows($result) > 0) {
+    echo "Error: Email already exists!";
+  } else {
+    // Hash password using bcrypt
+    $hash = password_hash($password, PASSWORD_BCRYPT);
+
+    // Insert new therapist profile into therapist_profiles table
+    $sql = "INSERT INTO therapist_profiles (email, password, first_name, middle_name, last_name, credentials, license_number, license_state, license_expiration, company, address, phone_number, education_bachelors, education_graduate, education_residency, education_fellowship, treat_one_on_one, billing_info) 
+    VALUES ('$email', '$hash', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', '1970-01-01', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'No', 'N/A')";
+
+    if (mysqli_query($conn, $sql)) {
+      // Store email in session variable
+      $_SESSION['email'] = $email;
+	  // Debugging code to check email
+echo "Email: " . $_SESSION['email'];
+     // header('Location: SignUp2.php');
+    } else {
+      echo "Error: " . $sql . "<br>" . mysqli_error($conn);
+    }
+  }
+
+  // Close connection
+  mysqli_close($conn);
+}
+?>
